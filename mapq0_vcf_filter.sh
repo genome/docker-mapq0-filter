@@ -2,7 +2,7 @@
 set -e
 
 outvcf=$1
-vcf=$2
+vcf=$2 #gzipped
 bam=$3
 ref_fasta=$4
 mapq0perc=$5
@@ -16,8 +16,8 @@ zgrep -v "^#" "$vcf" | grep -v "MQ0" | cut -f 1,2 | while read chr pos;do
 done
 
 if [[ $count -eq 0 ]];then
-    #no sites to process, just copy the vcf
-    cp $vcf $outdir/mapq0.vcf
+    #no sites to process, just make a copy of the vcf
+    gunzip -c $vcf > $outdir/mapq0.vcf
 else 
     #need to add MQ0
     
