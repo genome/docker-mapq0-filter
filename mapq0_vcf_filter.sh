@@ -1,8 +1,8 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 outvcf=$1
-vcf=$2 #gzipped
+vcf=$2
 bam=$3
 ref_fasta=$4
 mapq0perc=$5
@@ -16,8 +16,13 @@ zgrep -v "^#" "$vcf" | grep -v "MQ0" | cut -f 1,2 | while read chr pos;do
 done
 
 if [[ $count -eq 0 ]];then
-    #no sites to process, just make a copy of the vcf
-    gunzip -c $vcf > $outdir/mapq0.vcf
+    #no sites to process, just make a copy of the vcf. 
+    #Have to handle both gzipped and unzipped vcfs
+    if [ ${file: -3} == ".gz" ];then 
+        gunzip -c $vcf > $outdir/mapq0.vcf
+    else
+        cp $vcf $outdir/mapq0.vcf
+    fi
 else 
     #need to add MQ0
     
