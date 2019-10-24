@@ -1,4 +1,4 @@
-FROM griffithlab/vatools
+FROM griffithlab/vatools:3.0.1
 
 LABEL \
     description="tools needed for mapq0 filter"
