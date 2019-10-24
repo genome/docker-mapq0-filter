@@ -9,14 +9,12 @@ mapq0perc=$5
 outdir=$(dirname "$outvcf")
 
 #grab sites that don't already have the MQ0 field
-count=0;
 zgrep -v "^#" "$vcf" | grep -v "MQ0" | cut -f 1,2 | while read chr pos;do
     pysamstats --type mapq --chromosome $chr --start $pos --end $((pos+1)) "$bam"  | grep $pos | cut -f 1,2,5 >>$outdir/mapq0counts
-    count=$((count+1))
 done
 
 
-if [[ $count -eq 0 ]];then
+if [[ ! -s $outdir/mapq0counts ]];then
     #no sites to process, just make a copy of the vcf. 
     #Have to handle both gzipped and unzipped vcfs
     if [[ ${vcf: -3} == ".gz" ]];then 
