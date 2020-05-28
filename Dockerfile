@@ -26,5 +26,6 @@ RUN cd /tmp/ \
 ##############
 COPY mapq0_vcf_filter.sh /usr/bin/mapq0_vcf_filter.sh
 RUN chmod +x /usr/bin/mapq0_vcf_filter.sh
+RUN pip3 install cython==0.29.19
 RUN pip3 install pysam==0.15.4
 RUN pip3 install pysamstats==1.1.2
