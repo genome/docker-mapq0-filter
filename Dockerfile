@@ -11,10 +11,12 @@ RUN apt-get update -y && apt-get install -y \
     bzip2 \
     default-jre \
     wget \
-    zlib1g-dev #for pysam
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev
 
 RUN cd /tmp/ \
-    && wget -O /tmp/gatk3.6.tar.bz2 'https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.6-0-g89b7209' \
+    && wget -O /tmp/gatk3.6.tar.bz2 'https://storage.googleapis.com/gatk-software/package-archive/gatk/GenomeAnalysisTK-3.6-0-g89b7209.tar.bz2' \
     && tar xf gatk3.6.tar.bz2 \
     && cp GenomeAnalysisTK.jar /opt/GenomeAnalysisTK.jar \
     && rm -rf /tmp/*
@@ -24,5 +26,5 @@ RUN cd /tmp/ \
 ##############
 COPY mapq0_vcf_filter.sh /usr/bin/mapq0_vcf_filter.sh
 RUN chmod +x /usr/bin/mapq0_vcf_filter.sh
-RUN pip3 install pysam
-RUN pip3 install pysamstats
+RUN pip3 install pysam==0.15.4
+RUN pip3 install pysamstats==1.1.2
