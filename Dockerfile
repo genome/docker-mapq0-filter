@@ -10,10 +10,10 @@ RUN apt-get update -y && apt-get install -y \
     apt-utils \
     bzip2 \
     default-jre \
-    wget \
-    zlib1g-dev \
     libbz2-dev \
-    liblzma-dev
+    liblzma-dev \
+    wget \
+    zlib1g-dev
 
 RUN cd /tmp/ \
     && wget -O /tmp/gatk3.6.tar.bz2 'https://storage.googleapis.com/gatk-software/package-archive/gatk/GenomeAnalysisTK-3.6-0-g89b7209.tar.bz2' \
