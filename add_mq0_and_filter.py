@@ -43,7 +43,7 @@ def create_vcf_writer(args, vcf_reader):
     if not 'MQ0FRAC' in vcf_reader.header.format_ids():    
         od2 = OrderedDict([('ID', 'MQ0FRAC'), ('Number', '1'), ('Type', 'Float'), ('Description', 'Fraction of MAPQ == 0 reads covering this site in the tumor')])
         new_header.add_format_line(od2)
-    if not 'MQ0FRAC' in vcf_reader.header.filter_ids():    
+    if not 'MAPQ0' in vcf_reader.header.filter_ids():    
         od3 = OrderedDict([('ID', 'MAPQ0'), ('Description', 'Site exceeds {} fraction of reads with mapping quality zero'.format(args.mq0frac_threshold))])
         new_header.add_filter_line(od3)
 
@@ -83,7 +83,7 @@ def main(args_input = sys.argv[1:]):
     parser = define_parser()
     args = parser.parse_args(args_input)
 
-    vcf_reader  = create_vcf_reader(args)
+    vcf_reader = create_vcf_reader(args)
     vcf_writer = create_vcf_writer(args, vcf_reader)
 
     values = parse_tsv_file(args)

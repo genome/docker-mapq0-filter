@@ -19,9 +19,9 @@ if [[ $count -eq 0 ]];then
     #no sites to process, just make a copy of the (empty) vcf.
     #handle both gzipped and unzipped vcfs
     if [[ ${vcf: -3} == ".gz" ]];then 
-        gunzip -c $vcf > $outdir/mapq_filtered.vcf.gz
-    else
         cp $vcf $outdir/mapq_filtered.vcf.gz
+    else
+        gzip -c $vcf > $outdir/mapq_filtered.vcf.gz
     fi
 else 
     #process each line, add MQ0 and MQ0PERC values to the right sample, and add MAPQ0 filter when needed
