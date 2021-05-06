@@ -24,8 +24,8 @@ def create_vcf_reader(args):
     vcf_reader = vcfpy.Reader.from_path(args.input_vcf)
     if 'MQ0' in vcf_reader.header.format_ids():
         print("FORMAT already contains a MQ0 field. It's value will be overwritten when matches are found")
-    if 'MQ0PERC' in vcf_reader.header.format_ids() :
-        print("FORMAT already contains a MQ0PERC field. It's value will be overwritten when matches are found")
+    if 'MQ0FRAC' in vcf_reader.header.format_ids() :
+        print("FORMAT already contains a MQ0FRAC field. It's value will be overwritten when matches are found")
     return vcf_reader
 
 def create_vcf_writer(args, vcf_reader):
@@ -40,11 +40,11 @@ def create_vcf_writer(args, vcf_reader):
     if not 'MQ0' in vcf_reader.header.format_ids():
         od = OrderedDict([('ID', 'MQ0'), ('Number', '1'), ('Type', 'Float'), ('Description', 'Number of MAPQ == 0 reads covering this site in the tumor')])
         new_header.add_format_line(od)
-    if not 'MQ0PERC' in vcf_reader.header.format_ids():    
-        od2 = OrderedDict([('ID', 'MQ0PERC'), ('Number', '1'), ('Type', 'Float'), ('Description', 'Percentage of MAPQ == 0 reads covering this site in the tumor')])
+    if not 'MQ0FRAC' in vcf_reader.header.format_ids():    
+        od2 = OrderedDict([('ID', 'MQ0FRAC'), ('Number', '1'), ('Type', 'Float'), ('Description', 'Fraction of MAPQ == 0 reads covering this site in the tumor')])
         new_header.add_format_line(od2)
-    if not 'MQ0PERC' in vcf_reader.header.filter_ids():    
-        od3 = OrderedDict([('ID', 'MAPQ0'), ('Description', 'Site exceeds {} percent reads with mapping quality zero'.format(args.mq0perc_threshold))])
+    if not 'MQ0FRAC' in vcf_reader.header.filter_ids():    
+        od3 = OrderedDict([('ID', 'MAPQ0'), ('Description', 'Site exceeds {} fraction of reads with mapping quality zero'.format(args.mq0frac_threshold))])
         new_header.add_filter_line(od3)
 
     return vcfpy.Writer.from_path(output_file, new_header)
@@ -54,7 +54,7 @@ def define_parser():
         "vcf-mapq-filter",
         description = "A tool that will add mapping quality data from a tab-delimited file to a MQ0 field" +
                       "field in VCF INFO column, then apply a filter to sites with greater than a" +
-                      "specified percentage of reads with MAPQ0 in the tumor sample."
+                      "specified fraction of reads with MAPQ0 in the tumor sample."
     )
 
     parser.add_argument(
@@ -70,8 +70,8 @@ def define_parser():
         help="The sample name from which the MQ0 values were extracted. Expected to have a DP value"
     )
     parser.add_argument(
-        "mq0perc_threshold",
-        help="lines with MQ0PERC above this value will be labeled MAPQ0 in the FILTER field"
+        "mq0frac_threshold",
+        help="lines with MQ0FRAC above this value will be labeled MAPQ0 in the FILTER field"
     )
     parser.add_argument(
         "output_vcf",
@@ -94,17 +94,17 @@ def main(args_input = sys.argv[1:]):
                 entry.FORMAT = ["MQ0"]
             else:
                 entry.FORMAT.append('MQ0')
-        if "MQ0PERC" not in entry.FORMAT:
+        if "MQ0FRAC" not in entry.FORMAT:
             if isinstance(entry.FORMAT, tuple):
-                entry.FORMAT = ["MQ0PERC"]
+                entry.FORMAT = ["MQ0FRAC"]
             else:
-                entry.FORMAT.append('MQ0PERC')
+                entry.FORMAT.append('MQ0FRAC')
 
         if entry.CHROM + ":" + str(entry.POS) in values:
-            mq0perc = float(values[entry.CHROM + ":" + str(entry.POS)])/float(entry.call_for_sample[args.sample_name].data['DP'])
+            mq0frac = float(values[entry.CHROM + ":" + str(entry.POS)])/float(entry.call_for_sample[args.sample_name].data['DP'])
             entry.call_for_sample[args.sample_name].data['MQ0'] = values[entry.CHROM + ":" + str(entry.POS)]
-            entry.call_for_sample[args.sample_name].data['MQ0PERC'] = round(mq0perc,4)
-            if mq0perc > float(args.mq0perc_threshold):
+            entry.call_for_sample[args.sample_name].data['MQ0FRAC'] = round(mq0frac,4)
+            if mq0frac > float(args.mq0frac_threshold):
                 entry.add_filter('MAPQ0')
                 
         vcf_writer.write_record(entry)
