@@ -4,12 +4,6 @@ import vcfpy
 import csv
 from collections import OrderedDict
 
-def to_array(dictionary):
-    array = []
-    for key, value in dictionary.items():
-        array.append("{}|{}".format(key, value))
-    return sorted(array)
-
 def parse_tsv_file(args):
     values={}
     with open(args.values_file,'r') as tsvin:
@@ -23,9 +17,9 @@ def parse_tsv_file(args):
 def create_vcf_reader(args):
     vcf_reader = vcfpy.Reader.from_path(args.input_vcf)
     if 'MQ0' in vcf_reader.header.format_ids():
-        print("FORMAT already contains a MQ0 field. It's value will be overwritten when matches are found")
+        print("FORMAT already contains a MQ0 field. Existing values will be overwritten when matches are found.")
     if 'MQ0FRAC' in vcf_reader.header.format_ids() :
-        print("FORMAT already contains a MQ0FRAC field. It's value will be overwritten when matches are found")
+        print("FORMAT already contains a MQ0FRAC field. Existing values will be overwritten when matches are found.")
     return vcf_reader
 
 def create_vcf_writer(args, vcf_reader):
@@ -52,8 +46,8 @@ def create_vcf_writer(args, vcf_reader):
 def define_parser():
     parser = argparse.ArgumentParser(
         "vcf-mapq-filter",
-        description = "A tool that will add mapping quality data from a tab-delimited file to a MQ0 field" +
-                      "field in VCF INFO column, then apply a filter to sites with greater than a" +
+        description = "A tool that will add mapping quality data from a tab-delimited file to a MQ0 " +
+                      "field in VCF INFO column, then apply a filter to sites with greater than a " +
                       "specified fraction of reads with MAPQ0 in the tumor sample."
     )
 
@@ -63,7 +57,7 @@ def define_parser():
     )
     parser.add_argument(
         "values_file",
-        help="A TSV file containing three columns: chromosome, position, value"
+        help="A TSV file of mapq0 counts containing three columns: chromosome, position, value"
     )
     parser.add_argument(
         "sample_name",
@@ -100,9 +94,10 @@ def main(args_input = sys.argv[1:]):
             else:
                 entry.FORMAT.append('MQ0FRAC')
 
-        if entry.CHROM + ":" + str(entry.POS) in values:
-            mq0frac = float(values[entry.CHROM + ":" + str(entry.POS)])/float(entry.call_for_sample[args.sample_name].data['DP'])
-            entry.call_for_sample[args.sample_name].data['MQ0'] = values[entry.CHROM + ":" + str(entry.POS)]
+        key = entry.CHROM + ":" + str(entry.POS) 
+        if key in values:
+            mq0frac = float(values[key])/float(entry.call_for_sample[args.sample_name].data['DP'])
+            entry.call_for_sample[args.sample_name].data['MQ0'] = values[key]
             entry.call_for_sample[args.sample_name].data['MQ0FRAC'] = round(mq0frac,4)
             if mq0frac > float(args.mq0frac_threshold):
                 entry.add_filter('MAPQ0')
