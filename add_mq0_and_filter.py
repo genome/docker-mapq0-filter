@@ -102,6 +102,10 @@ def main(args_input = sys.argv[1:]):
                 entry.call_for_sample[args.sample_name].data['MQ0FRAC'] = round(mq0frac,4)
                 if mq0frac > float(args.mq0frac_threshold):
                     entry.add_filter('MAPQ0')
+            else:
+                print("No MQ0 value found for " + key, file=sys.stderr)
+        else:
+            print("No DP value in VCF for " + key, file=sys.stderr)
 
         vcf_writer.write_record(entry)
 
