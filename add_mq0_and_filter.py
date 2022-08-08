@@ -95,12 +95,13 @@ def main(args_input = sys.argv[1:]):
                 entry.FORMAT.append('MQ0FRAC')
 
         key = entry.CHROM + ":" + str(entry.POS) 
-        if key in values:
-            mq0frac = float(values[key])/float(entry.call_for_sample[args.sample_name].data['DP'])
-            entry.call_for_sample[args.sample_name].data['MQ0'] = values[key]
-            entry.call_for_sample[args.sample_name].data['MQ0FRAC'] = round(mq0frac,4)
-            if mq0frac > float(args.mq0frac_threshold):
-                entry.add_filter('MAPQ0')
+        if "DP" in entry.FORMAT:
+            if key in values:
+                mq0frac = float(values[key])/float(entry.call_for_sample[args.sample_name].data['DP'])
+                entry.call_for_sample[args.sample_name].data['MQ0'] = values[key]
+                entry.call_for_sample[args.sample_name].data['MQ0FRAC'] = round(mq0frac,4)
+                if mq0frac > float(args.mq0frac_threshold):
+                    entry.add_filter('MAPQ0')
                 
         vcf_writer.write_record(entry)
 
