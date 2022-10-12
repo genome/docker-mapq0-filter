@@ -97,11 +97,15 @@ def main(args_input = sys.argv[1:]):
         key = entry.CHROM + ":" + str(entry.POS)
         if "DP" in entry.FORMAT:
             if key in values:
-                mq0frac = float(values[key])/float(entry.call_for_sample[args.sample_name].data['DP'])
-                entry.call_for_sample[args.sample_name].data['MQ0'] = values[key]
-                entry.call_for_sample[args.sample_name].data['MQ0FRAC'] = round(mq0frac,4)
-                if mq0frac > float(args.mq0frac_threshold):
-                    entry.add_filter('MAPQ0')
+                depth_for_sample = float(entry.call_for_sample[args.sample_name].data['DP'])
+                if depth_for_sample == 0.0:
+                    print("DP value was 0 in VCF for " + key, file=sys.stderr)
+                else:
+                    mq0frac = float(values[key])/depth_for_sample
+                    entry.call_for_sample[args.sample_name].data['MQ0'] = values[key]
+                    entry.call_for_sample[args.sample_name].data['MQ0FRAC'] = round(mq0frac,4)
+                    if mq0frac > float(args.mq0frac_threshold):
+                        entry.add_filter('MAPQ0')
             else:
                 print("No MQ0 value found for " + key, file=sys.stderr)
         else:
